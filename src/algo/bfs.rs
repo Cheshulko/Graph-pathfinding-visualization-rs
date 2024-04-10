@@ -23,7 +23,7 @@ impl PathFinder for Bfs {
         })
     }
 
-    fn tick(&mut self) -> bool {
+    fn step(&mut self) {
         let mut result = false;
 
         if let Some((length, cur)) = self.frontier.pop_front() {
@@ -60,11 +60,8 @@ impl PathFinder for Bfs {
         };
 
         if result {
-            self.graph_wrapper.build_path();
             self.graph_wrapper.completed = true;
         };
-
-        result
     }
 
     fn reset(&mut self) {

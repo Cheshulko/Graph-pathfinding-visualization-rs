@@ -24,7 +24,7 @@ impl PathFinder for Dijkstra {
         })
     }
 
-    fn tick(&mut self) -> bool {
+    fn step(&mut self) {
         let mut result = false;
 
         while let Some((Reverse(length), cur)) = self.priority_queue.pop() {
@@ -80,11 +80,8 @@ impl PathFinder for Dijkstra {
         }
 
         if result {
-            self.graph_wrapper.build_path();
             self.graph_wrapper.completed = true;
         };
-
-        result
     }
 
     fn reset(&mut self) {

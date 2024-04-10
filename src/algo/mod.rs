@@ -1,4 +1,4 @@
-use crate::graph::{Graph, GraphWrapper, Point, PointCoord};
+use crate::graph::{Graph, GraphPath, GraphWrapper, Point, PointCoord};
 
 pub mod bfs;
 pub mod dijkstra;
@@ -13,7 +13,7 @@ pub trait PathFinder {
     where
         Self: Sized;
 
-    fn tick(&mut self) -> bool;
+    fn step(&mut self);
 
     fn reset(&mut self);
 
@@ -26,7 +26,7 @@ pub trait PathFinder {
     }
 
     fn is_completed(&self) -> bool {
-        self.graph_wrapper().completed
+        self.graph_wrapper().is_completed()
     }
 
     fn point_at<'a>(&'a self, point_coord: &PointCoord) -> &'a Point {
@@ -37,5 +37,13 @@ pub trait PathFinder {
         *self.graph_wrapper_mut() = GraphWrapper::new(graph);
 
         self.reset();
+    }
+
+    fn build_path<'a>(&'a mut self) -> Option<GraphPath<'a>> {
+        if self.is_completed() {
+            Some(self.graph_wrapper_mut().build_path())
+        } else {
+            None
+        }
     }
 }

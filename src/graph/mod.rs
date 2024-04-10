@@ -2,7 +2,7 @@ mod generation;
 mod graph_wrapper;
 
 pub(crate) use generation::Generation;
-pub(crate) use graph_wrapper::GraphWrapper;
+pub(crate) use graph_wrapper::{GraphPath, GraphWrapper};
 
 #[derive(Clone, PartialEq, Eq)]
 // #[rustfmt::skip]
@@ -114,6 +114,12 @@ impl std::fmt::Display for Graph {
         }
 
         Ok(())
+    }
+}
+
+impl std::fmt::Display for PointCoord {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "y={}, x={}", self.y, self.x)
     }
 }
 

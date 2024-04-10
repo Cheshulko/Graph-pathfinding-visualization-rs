@@ -170,11 +170,12 @@ pub fn start_ui() -> anyhow::Result<()> {
 
             // Keys
             /*
-                `t` - make algorithm's tick
+                `s` - make algorithm's step
                 `r` - reset graph to initial state
 
                 `d` - set dijksta's algorithm
-                `b - set bfs algorithm
+                `b` - set bfs algorithm
+                `h` - set heuristic algorithm
 
                 `1` - set 1' predefined graph
                 `-` - generate ramdom graph
@@ -184,9 +185,17 @@ pub fn start_ui() -> anyhow::Result<()> {
                 return;
             }
 
-            if input.key_pressed_os(VirtualKeyCode::T) {
+            if input.key_pressed_os(VirtualKeyCode::S) {
                 if !world.algo.is_completed() {
-                    let _is_completed = world.algo.tick();
+                    world.algo.step();
+
+                    if world.algo.is_completed() {
+                        if let Some(path) = world.algo.build_path() {
+                            println!("[I] {path}");
+                        } else {
+                            println!("[I] Completed. Path is not found");
+                        }
+                    }
                 }
             }
 

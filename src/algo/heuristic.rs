@@ -32,7 +32,7 @@ impl PathFinder for Heuristic {
         let priority_queue =
             BinaryHeap::from_iter([(Reverse(0), Reverse(0), graph_wrapper.start_coord().clone())]);
 
-        println!("[I] Heuristic");
+        println!("[I] Heuristic[Manhattan distance]");
 
         Box::new(Self {
             graph_wrapper,
@@ -40,7 +40,7 @@ impl PathFinder for Heuristic {
         })
     }
 
-    fn tick(&mut self) -> bool {
+    fn step(&mut self) {
         let mut result = false;
 
         while let Some((Reverse(_), Reverse(length), cur)) = self.priority_queue.pop() {
@@ -97,11 +97,8 @@ impl PathFinder for Heuristic {
         }
 
         if result {
-            self.graph_wrapper.build_path();
             self.graph_wrapper.completed = true;
         };
-
-        result
     }
 
     fn reset(&mut self) {
