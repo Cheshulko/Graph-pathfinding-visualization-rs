@@ -35,6 +35,8 @@ pub struct Graph {
 }
 
 impl Graph {
+    pub const OBSTACLE_DIFFICULTY_K: u32 = 6;
+
     const DIRS: &[(i32, i32)] = &[(0, 1), (0, -1), (1, 0), (-1, 0)];
 }
 

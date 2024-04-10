@@ -42,9 +42,9 @@ impl PathFinder for Bfs {
                 .neighbors(&cur)
                 .filter_map(|(to_point, to)| match to_point {
                     &Point::Free if self.graph_wrapper.came_from[to.y][to.x] == None => {
-                        self.frontier.push_back((to_length, to.clone()));
                         Some((to, cur.clone(), to_length))
                     }
+
                     &Point::End => {
                         result = true;
                         Some((to, cur.clone(), to_length))
@@ -54,6 +54,7 @@ impl PathFinder for Bfs {
                 .collect::<Vec<_>>();
 
             for (to, cur, to_length) in reached_points.into_iter() {
+                self.frontier.push_back((to_length, to.clone()));
                 self.graph_wrapper.came_from[to.y][to.x] = Some((cur.clone(), to_length));
             }
         };
@@ -66,10 +67,6 @@ impl PathFinder for Bfs {
         result
     }
 
-    fn point_at<'a>(&'a self, point_coord: &PointCoord) -> &'a Point {
-        self.graph_wrapper.point_at(point_coord)
-    }
-
     fn reset(&mut self) {
         self.graph_wrapper.reset();
 
@@ -77,17 +74,11 @@ impl PathFinder for Bfs {
         self.frontier = frontier;
     }
 
-    fn reset_with(&mut self, graph: Graph) {
-        self.graph_wrapper = GraphWrapper::new(graph);
-
-        self.reset();
+    fn graph_wrapper<'a>(&'a self) -> &'a GraphWrapper {
+        &self.graph_wrapper
     }
 
-    fn is_completed(&self) -> bool {
-        self.graph_wrapper.completed
-    }
-
-    fn graph<'a>(&'a self) -> &'a Graph {
-        &self.graph_wrapper.graph()
+    fn graph_wrapper_mut<'a>(&'a mut self) -> &'a mut GraphWrapper {
+        &mut self.graph_wrapper
     }
 }

@@ -1,6 +1,6 @@
 use crate::graph::{Graph, Point, PointCoord};
 
-pub(crate) struct GraphWrapper {
+pub struct GraphWrapper {
     /* fuck */ graph: Graph,
     start: PointCoord,
     end: PointCoord,
