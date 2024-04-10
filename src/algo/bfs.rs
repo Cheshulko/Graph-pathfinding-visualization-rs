@@ -1,19 +1,19 @@
 use std::collections::VecDeque;
 
-use crate::graph::{Graph, Point};
+use crate::graph::{Graph, GraphWrapper, Point, PointCoord};
 
-use super::{GraphWrapper, PathFinder};
+use super::PathFinder;
 
 pub struct Bfs {
     graph_wrapper: GraphWrapper,
 
-    frontier: VecDeque<(u32, (usize, usize))>,
+    frontier: VecDeque<(u32, PointCoord)>,
 }
 
 impl PathFinder for Bfs {
     fn new(graph: Graph) -> Box<dyn PathFinder> {
         let graph_wrapper = GraphWrapper::new(graph);
-        let frontier = VecDeque::from_iter([(0, graph_wrapper.start)]);
+        let frontier = VecDeque::from_iter([(0, graph_wrapper.start_coord().clone())]);
 
         println!("[I] Bfs");
 
@@ -26,32 +26,35 @@ impl PathFinder for Bfs {
     fn tick(&mut self) -> bool {
         let mut result = false;
 
-        if let Some((length, (cur_i, cur_j))) = self.frontier.pop_front() {
+        if let Some((length, cur)) = self.frontier.pop_front() {
             // Mark current as seen
-            if cur_i == self.graph_wrapper.start.0 && cur_j == self.graph_wrapper.start.1 {
+            if &cur == self.graph_wrapper.start_coord() {
             } else {
-                self.graph_wrapper.graph.mtx[cur_i][cur_j] = Point::Seen {
-                    initial_point: Box::new(self.graph_wrapper.graph.mtx[cur_i][cur_j].clone()),
-                };
+                self.graph_wrapper.seen_for_point(&cur);
             }
 
             // Bfs doest support lengths(weights)
             let to_length = length + 1;
 
-            for (to_point, to_i, to_j) in self.graph_wrapper.graph.neighbors(cur_i, cur_j) {
-                match to_point {
-                    &Point::Free if self.graph_wrapper.came_from[to_i][to_j] == None => {
-                        self.graph_wrapper.came_from[to_i][to_j] =
-                            Some(((cur_i, cur_j), to_length));
-                        self.frontier.push_back((to_length, (to_i, to_j)));
+            let reached_points = self
+                .graph_wrapper
+                .graph()
+                .neighbors(&cur)
+                .filter_map(|(to_point, to)| match to_point {
+                    &Point::Free if self.graph_wrapper.came_from[to.y][to.x] == None => {
+                        self.frontier.push_back((to_length, to.clone()));
+                        Some((to, cur.clone(), to_length))
                     }
                     &Point::End => {
-                        self.graph_wrapper.came_from[to_i][to_j] =
-                            Some(((cur_i, cur_j), to_length));
                         result = true;
+                        Some((to, cur.clone(), to_length))
                     }
-                    _ => {}
-                }
+                    _ => None,
+                })
+                .collect::<Vec<_>>();
+
+            for (to, cur, to_length) in reached_points.into_iter() {
+                self.graph_wrapper.came_from[to.y][to.x] = Some((cur.clone(), to_length));
             }
         };
 
@@ -63,14 +66,14 @@ impl PathFinder for Bfs {
         result
     }
 
-    fn point_mut<'a>(&'a mut self, i: usize, j: usize) -> &'a mut Point {
-        self.graph_wrapper.point_mut(i, j)
+    fn point_at<'a>(&'a self, point_coord: &PointCoord) -> &'a Point {
+        self.graph_wrapper.point_at(point_coord)
     }
 
     fn reset(&mut self) {
         self.graph_wrapper.reset();
 
-        let frontier = VecDeque::from_iter([(0, self.graph_wrapper.start)]);
+        let frontier = VecDeque::from_iter([(0, self.graph_wrapper.start_coord().clone())]);
         self.frontier = frontier;
     }
 
@@ -80,11 +83,11 @@ impl PathFinder for Bfs {
         self.reset();
     }
 
-    fn point<'a>(&'a self, i: usize, j: usize) -> &'a Point {
-        self.graph_wrapper.point(i, j)
-    }
-
     fn is_completed(&self) -> bool {
         self.graph_wrapper.completed
+    }
+
+    fn graph<'a>(&'a self) -> &'a Graph {
+        &self.graph_wrapper.graph()
     }
 }

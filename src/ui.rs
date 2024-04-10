@@ -8,7 +8,7 @@ use winit_input_helper::WinitInputHelper;
 use anyhow::Context;
 
 use crate::algo::PathFinder;
-use crate::graph::{Generation, Point};
+use crate::graph::{Generation, Point, PointCoord};
 use crate::{algo, graph};
 
 const WIDTH: u32 = 800;
@@ -86,7 +86,10 @@ impl World {
         let start_x_1 = self.column_width * point_j as u32;
         let start_x_2 = self.column_width * (point_j + 1) as u32;
 
-        let point = self.algo.point(point_i as usize, point_j as usize);
+        let point = self.algo.point_at(&PointCoord {
+            y: point_i as usize,
+            x: point_j as usize,
+        });
 
         if (pixel_y >= start_y_1 && pixel_y <= start_y_2)
             && (pixel_x >= start_x_1 && pixel_x <= start_x_2)
@@ -166,6 +169,16 @@ pub fn start_ui() -> anyhow::Result<()> {
             }
 
             // Keys
+            /*
+                `t` - make algorithm's tick
+                `r` - reset graph to initial state
+
+                `d` - set dijksta's algorithm
+                `b - set bfs algorithm
+
+                `1` - set 1' predefined graph
+                `-` - generate ramdom graph
+            */
             if input.key_pressed(VirtualKeyCode::Q) || input.close_requested() {
                 *control_flow = ControlFlow::Exit;
                 return;
@@ -182,15 +195,15 @@ pub fn start_ui() -> anyhow::Result<()> {
             }
 
             if input.key_pressed_os(VirtualKeyCode::D) {
-                // TODO: Fix reseting graph
-                let graph = graph::Graph::generate_graph(Generation::Predefined1);
+                let graph = world.algo.graph().clone();
                 world.algo = algo::Dijkstra::new(graph);
+                world.algo.reset();
             }
 
             if input.key_pressed_os(VirtualKeyCode::B) {
-                // TODO: Fix reseting graph
-                let graph = graph::Graph::generate_graph(Generation::Predefined1);
+                let graph = world.algo.graph().clone();
                 world.algo = algo::Bfs::new(graph);
+                world.algo.reset();
             }
 
             if input.key_pressed_os(VirtualKeyCode::Key1) {

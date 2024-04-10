@@ -1,18 +1,8 @@
 use rand::Rng;
 
-#[derive(Clone, PartialEq, Eq)]
-pub enum Point {
-    Start,
-    End,
-    Free,
-    Path { initial_point: Box<Point> },
-    Seen { initial_point: Box<Point> },
-    Obstacle { length: u32 },
-}
+use crate::graph::Point;
 
-pub struct Graph {
-    pub mtx: Vec<Vec<Point>>,
-}
+use super::Graph;
 
 pub enum Generation {
     Predefined1,
@@ -20,8 +10,6 @@ pub enum Generation {
 }
 
 impl Graph {
-    const DIRS: &[(i32, i32)] = &[(0, 1), (0, -1), (1, 0), (-1, 0)];
-
     pub fn generate_graph(generation: Generation) -> Self {
         match generation {
             Generation::Predefined1 => Graph::generate_graph_predefined_1(),
@@ -103,93 +91,5 @@ impl Graph {
         }
 
         Graph { mtx }
-    }
-
-    pub fn neighbors<'a>(
-        &'a self,
-        cur_i: usize,
-        cur_j: usize,
-    ) -> impl Iterator<Item = (&'a Point, usize, usize)> {
-        Self::DIRS.iter().filter_map(move |(di, dj)| {
-            let to_i = (cur_i as i32 + di) as usize;
-            let to_j = (cur_j as i32 + dj) as usize;
-
-            let point = self.mtx.get(to_i)?.get(to_j)?;
-
-            Some((point, to_i, to_j))
-        })
-    }
-
-    pub fn n(&self) -> usize {
-        self.mtx.len()
-    }
-
-    pub fn m(&self) -> usize {
-        self.mtx[0].len()
-    }
-}
-
-impl std::fmt::Display for Point {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(
-            f,
-            "{}",
-            match &self {
-                Point::Start => "S",
-                Point::End => "E",
-                Point::Free => ".",
-                Point::Path { .. } => "*",
-                Point::Obstacle { .. } => "X",
-                Point::Seen { .. } => "O",
-            },
-        )
-    }
-}
-
-impl std::fmt::Display for Graph {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        for row in &self.mtx {
-            for point in row {
-                write!(f, "{}", point)?;
-            }
-            write!(f, "\n")?;
-        }
-
-        Ok(())
-    }
-}
-
-impl Graph {
-    pub const N: usize = 10;
-    pub const M: usize = 10;
-
-    pub fn start(&self) -> Option<(usize, usize)> {
-        let mut start: Option<(usize, usize)> = None;
-
-        'out: for (i_, row_) in self.mtx.iter().enumerate() {
-            for (j_, point) in row_.iter().enumerate() {
-                if point == &Point::Start {
-                    start = Some((i_, j_));
-                    break 'out;
-                }
-            }
-        }
-
-        start
-    }
-
-    pub fn end(&self) -> Option<(usize, usize)> {
-        let mut end: Option<(usize, usize)> = None;
-
-        'out: for (i_, row_) in self.mtx.iter().enumerate() {
-            for (j_, point) in row_.iter().enumerate() {
-                if point == &Point::End {
-                    end = Some((i_, j_));
-                    break 'out;
-                }
-            }
-        }
-
-        end
     }
 }

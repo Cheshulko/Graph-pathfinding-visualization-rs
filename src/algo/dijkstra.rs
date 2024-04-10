@@ -1,11 +1,13 @@
 use std::{cmp::Reverse, collections::BinaryHeap};
 
-use super::{Graph, GraphWrapper, PathFinder, Point};
+use crate::graph::{GraphWrapper, PointCoord};
+
+use super::{Graph, PathFinder, Point};
 
 pub struct Dijkstra {
     graph_wrapper: GraphWrapper,
 
-    priority_queue: BinaryHeap<(Reverse<u32>, (usize, usize))>,
+    priority_queue: BinaryHeap<(Reverse<u32>, PointCoord)>,
 }
 
 impl Dijkstra {
@@ -15,7 +17,8 @@ impl Dijkstra {
 impl PathFinder for Dijkstra {
     fn new(graph: Graph) -> Box<dyn PathFinder> {
         let graph_wrapper = GraphWrapper::new(graph);
-        let priority_queue = BinaryHeap::from_iter([(Reverse(0), graph_wrapper.start)]);
+        let priority_queue =
+            BinaryHeap::from_iter([(Reverse(0), graph_wrapper.start_coord().clone())]);
 
         println!("[I] Dijkstra");
 
@@ -28,49 +31,58 @@ impl PathFinder for Dijkstra {
     fn tick(&mut self) -> bool {
         let mut result = false;
 
-        while let Some((Reverse(length), (cur_i, cur_j))) = self.priority_queue.pop() {
+        while let Some((Reverse(length), cur)) = self.priority_queue.pop() {
             // Skip `worse` points
-            if let Some(((_, _), length_best)) = self.graph_wrapper.came_from[cur_i][cur_j] {
+            if let Some((_, length_best)) = self.graph_wrapper.came_from[cur.y][cur.x] {
                 if length_best < length {
                     continue;
                 }
             }
 
             // Found `end`
-            if cur_i == self.graph_wrapper.end.0 && cur_j == self.graph_wrapper.end.1 {
+            if &cur == self.graph_wrapper.end_coord() {
                 result = true;
                 break;
             }
 
-            // Mark current as seen
-            if cur_i == self.graph_wrapper.start.0 && cur_j == self.graph_wrapper.start.1 {
+            // Mark current as seen, not mark start
+            if &cur == self.graph_wrapper.start_coord() {
             } else {
-                self.graph_wrapper.graph.mtx[cur_i][cur_j] = Point::Seen {
-                    initial_point: Box::new(self.graph_wrapper.graph.mtx[cur_i][cur_j].clone()),
-                };
+                self.graph_wrapper.seen_for_point(&cur);
             }
 
-            for (to_point, to_i, to_j) in self.graph_wrapper.graph.neighbors(cur_i, cur_j) {
-                let length_to = match to_point {
-                    Point::Free => length + 1,
-                    Point::End => length + 1,
-                    Point::Obstacle {
-                        length: point_length,
-                    } => {
-                        assert!(point_length < &4);
-                        length + (point_length + 1) * Self::OBSTACLE_DIFFICULTY_K
-                    }
-                    _ => continue,
-                };
+            let reached_points = self
+                .graph_wrapper
+                .graph()
+                .neighbors(&cur)
+                .filter_map(|(to_point, to)| {
+                    let length_to = match to_point {
+                        Point::Free => length + 1,
+                        Point::End => length + 1,
+                        Point::Obstacle {
+                            length: point_length,
+                        } => {
+                            assert!(point_length < &4);
+                            length + (point_length + 1) * Self::OBSTACLE_DIFFICULTY_K
+                        }
+                        _ => return None,
+                    };
 
-                match self.graph_wrapper.came_from[to_i][to_j] {
-                    Some(((_, _), length_best)) if length_best <= length_to => {}
-                    _ => {
-                        self.graph_wrapper.came_from[to_i][to_j] =
-                            Some(((cur_i, cur_j), length_to));
-                        self.priority_queue.push((Reverse(length_to), (to_i, to_j)));
+                    match self.graph_wrapper.came_from[to.y][to.x] {
+                        Some((_, length_best)) if length_best <= length_to => {
+                            return None;
+                        }
+                        _ => {
+                            self.priority_queue.push((Reverse(length_to), to.clone()));
+
+                            return Some((to, cur.clone(), length_to));
+                        }
                     }
-                }
+                })
+                .collect::<Vec<_>>();
+
+            for (to, cur, length_to) in reached_points.into_iter() {
+                self.graph_wrapper.came_from[to.y][to.x] = Some((cur, length_to));
             }
 
             break;
@@ -84,14 +96,11 @@ impl PathFinder for Dijkstra {
         result
     }
 
-    fn point_mut<'a>(&'a mut self, i: usize, j: usize) -> &'a mut Point {
-        self.graph_wrapper.point_mut(i, j)
-    }
-
     fn reset(&mut self) {
         self.graph_wrapper.reset();
 
-        let priority_queue = BinaryHeap::from_iter([(Reverse(0), self.graph_wrapper.start)]);
+        let priority_queue =
+            BinaryHeap::from_iter([(Reverse(0), self.graph_wrapper.start_coord().clone())]);
         self.priority_queue = priority_queue;
     }
 
@@ -101,11 +110,15 @@ impl PathFinder for Dijkstra {
         self.reset();
     }
 
-    fn point<'a>(&'a self, i: usize, j: usize) -> &'a Point {
-        self.graph_wrapper.point(i, j)
+    fn point_at<'a>(&'a self, point_coord: &PointCoord) -> &'a Point {
+        self.graph_wrapper.point_at(point_coord)
     }
 
     fn is_completed(&self) -> bool {
         self.graph_wrapper.completed
+    }
+
+    fn graph<'a>(&'a self) -> &'a Graph {
+        &self.graph_wrapper.graph()
     }
 }
