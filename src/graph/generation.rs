@@ -6,6 +6,7 @@ use super::Graph;
 
 pub enum Generation {
     Predefined1,
+    Predefined2,
     Random,
 }
 
@@ -13,6 +14,7 @@ impl Graph {
     pub fn generate_graph(generation: Generation) -> Self {
         match generation {
             Generation::Predefined1 => Graph::generate_graph_predefined_1(),
+            Generation::Predefined2 => Graph::generate_graph_predefined_2(),
             Generation::Random => Graph::generate_random(),
         }
     }
@@ -43,6 +45,26 @@ impl Graph {
         mtx[7][4] = Point::Obstacle { length: 1 };
         mtx[7][5] = Point::Obstacle { length: 2 };
         mtx[7][6] = Point::Obstacle { length: 3 };
+
+        Graph { mtx }
+    }
+
+    fn generate_graph_predefined_2() -> Self {
+        println!("[I] generate_graph_predefined_2");
+
+        let mut mtx = vec![vec![Point::Free; Self::M]; Self::N];
+
+        mtx[Self::N - 3][0] = Point::Start;
+        mtx[3][Self::M - 1] = Point::End;
+
+        for i in 1..Self::N - 1 {
+            mtx[i][7] = Point::Obstacle { length: 3 };
+        }
+
+        for j in 3..Self::M - 2 {
+            mtx[1][j] = Point::Obstacle { length: 3 };
+            mtx[Self::N - 2][j] = Point::Obstacle { length: 3 };
+        }
 
         Graph { mtx }
     }
