@@ -1,9 +1,11 @@
 use crate::graph::{Graph, GraphPath, GraphWrapper, Point, PointCoord};
 
+pub mod a_star;
 pub mod bfs;
 pub mod dijkstra;
 pub mod heuristic;
 
+pub use a_star::AStar;
 pub use bfs::Bfs;
 pub use dijkstra::Dijkstra;
 pub use heuristic::Heuristic;

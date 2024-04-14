@@ -221,6 +221,12 @@ pub fn start_ui() -> anyhow::Result<()> {
                 world.algo.reset();
             }
 
+            if input.key_pressed_os(VirtualKeyCode::A) {
+                let graph = world.algo.graph().clone();
+                world.algo = algo::AStar::new(graph);
+                world.algo.reset();
+            }
+
             if input.key_pressed_os(VirtualKeyCode::Key1) {
                 let graph = graph::Graph::generate_graph(Generation::Predefined1);
                 world.algo.reset_with(graph);

@@ -4,13 +4,13 @@ use crate::graph::{GraphWrapper, Point, PointCoord};
 
 use super::PathFinder;
 
-pub struct Heuristic {
+pub struct AStar {
     graph_wrapper: GraphWrapper,
 
     priority_queue: BinaryHeap<(Reverse<u32>, Reverse<u32>, PointCoord)>,
 }
 
-impl Heuristic {
+impl AStar {
     // Manhattan distance on a square grid
     pub fn heuristic(&self, a: &PointCoord, b: &PointCoord) -> u32 {
         let x_max = a.x.max(b.x);
@@ -23,7 +23,7 @@ impl Heuristic {
     }
 }
 
-impl PathFinder for Heuristic {
+impl PathFinder for AStar {
     fn new(graph: crate::graph::Graph) -> Box<dyn PathFinder>
     where
         Self: Sized,
@@ -32,7 +32,7 @@ impl PathFinder for Heuristic {
         let priority_queue =
             BinaryHeap::from_iter([(Reverse(0), Reverse(0), graph_wrapper.start_coord().clone())]);
 
-        println!("[I] Heuristic[Manhattan distance]");
+        println!("[I] AStar[Heuristic: Manhattan distance]");
 
         Box::new(Self {
             graph_wrapper,
@@ -85,7 +85,7 @@ impl PathFinder for Heuristic {
                 let heuristic_length_end = self.heuristic(&to, &self.graph().end().unwrap());
 
                 self.priority_queue.push((
-                    Reverse(heuristic_length_end),
+                    Reverse(length_to + heuristic_length_end),
                     Reverse(length_to),
                     to.clone(),
                 ));

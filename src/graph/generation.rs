@@ -54,15 +54,15 @@ impl Graph {
 
         let mut mtx = vec![vec![Point::Free; Self::M]; Self::N];
 
-        mtx[Self::N - 3][0] = Point::Start;
-        mtx[3][Self::M - 1] = Point::End;
+        mtx[Self::N - 2][0] = Point::Start;
+        mtx[1][Self::M - 2] = Point::End;
 
-        for i in 1..Self::N - 1 {
+        for i in 2..Self::N - 1 {
             mtx[i][7] = Point::Obstacle { length: 3 };
         }
 
         for j in 3..Self::M - 2 {
-            mtx[1][j] = Point::Obstacle { length: 3 };
+            mtx[2][j] = Point::Obstacle { length: 3 };
             mtx[Self::N - 2][j] = Point::Obstacle { length: 3 };
         }
 
