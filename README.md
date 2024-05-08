@@ -13,6 +13,13 @@ The graph is presented as a grid with start-end points and obstacles. Each move 
 - [x] [Heuristic algorithm](https://en.wikipedia.org/wiki/Admissible_heuristic) (heuristic function - [Manhattan distance](https://en.wikipedia.org/wiki/Taxicab_geometry))
 - [x] [A* algorithm](https://en.wikipedia.org/wiki/A*_search_algorithm) (heuristic function - [Manhattan distance](https://en.wikipedia.org/wiki/Taxicab_geometry))
 
+|  |  |  |
+| -------  |---| --- |
+| <img src="https://github.com/Cheshulko/Graph-pathfinding-visualization-rs/blob/main/assets/pre2/bfs-pre2.gif?raw=true" width="400" /> | Breadth first search |Seen points: 73, Length: 15|
+| <img src="https://github.com/Cheshulko/Graph-pathfinding-visualization-rs/blob/main/assets/pre2/dijkstra-pre2.gif?raw=true" width="400" /> | Dijkstra's algorithm |Seen points:    76, Length: 15|
+| <img src="https://github.com/Cheshulko/Graph-pathfinding-visualization-rs/blob/main/assets/pre2/h-pre2.gif?raw=true" width="400" /> | Heuristic algorithm |Seen points: 16, Length: 17|
+| <img src="https://github.com/Cheshulko/Graph-pathfinding-visualization-rs/blob/main/assets/pre2/a-pre2.gif?raw=true" width="400" /> | A* algorithm |Seen points: 68, Length: 15|
+
 ## Navigation
 Primitive navigation:
 ```
