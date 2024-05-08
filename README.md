@@ -5,6 +5,8 @@ Visualization of several well-known graph pathfinding algorithms using [Rust pro
 
 The graph is presented as a grid with start-end points and obstacles. Each move (if it moves to a free cell) costs 1 point. 4 types of difficulties of obstacles are supported. Both Dijkstra and A* support moving through obstacles with moving's cost `obstacle's difficulty * Graph::OBSTACLE_DIFFICULTY_K`
 
+<img src="https://github.com/Cheshulko/Graph-pathfinding-visualization-rs/blob/main/assets/pre1/dijkstra-pre1.gif" width="700">
+
 ## Algorithms
 - [x] [Breadth first search](https://en.wikipedia.org/wiki/Breadth-first_search)
 - [x] [Dijkstra's algorithm](https://en.wikipedia.org/wiki/Dijkstra%27s_algorithm)
