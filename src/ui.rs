@@ -176,8 +176,10 @@ pub fn start_ui() -> anyhow::Result<()> {
                 `d` - set dijksta's algorithm
                 `b` - set bfs algorithm
                 `h` - set heuristic algorithm
+                `a` - set a-star algorithm
 
                 `1` - set 1' predefined graph
+                `2` - set 2' predefined graph
                 `-` - generate ramdom graph
             */
             if input.key_pressed(VirtualKeyCode::Q) || input.close_requested() {
